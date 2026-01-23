@@ -1,0 +1,37 @@
+{
+  "project_info": {
+    "project_number": "355480003866",
+    "project_id": "reddit-8ba38",
+    "storage_bucket": "reddit-8ba38.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:355480003866:android:91d68a9566b44b23eff8a3",
+        "android_client_info": {
+          "package_name": "com.example.reddit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCzy5sgvBD-qEb8IR1y9f_n6xDWfdQ6NgE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "355480003866-sjapf7fnnrhfmqrfolcspnvdu6ufb8hb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.reddit"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
