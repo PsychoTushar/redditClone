@@ -17,8 +17,24 @@ class Pallete {
       backgroundColor: drawerColor,
       iconTheme: IconThemeData(color: whiteColor),
     ),
+    // 🎨 Global colors
+  primaryColor: blueColor,
+
+  // 🎯 Text color (default everywhere)
+  textTheme: ThemeData.dark().textTheme.apply(
+        bodyColor: whiteColor,
+        displayColor: whiteColor,
+      ),
+
+  // 🎯 Button theme (modern)
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: blueColor, // default button color
+      foregroundColor: whiteColor, // text/icon color
+    ),
+  ),
     drawerTheme: const DrawerThemeData(backgroundColor: drawerColor),
-    primaryColor: redColor,
+    // primaryColor: redColor,
     colorScheme: ThemeData.dark().colorScheme.copyWith(
       background: drawerColor,
     ), // will be used as alternative background color

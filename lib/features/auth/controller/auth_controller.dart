@@ -14,11 +14,15 @@ final authControllerProvider = StateNotifierProvider<AuthController, bool>(
     ref: ref,
   ),
 );
+
+//Provider to listen to the changes in the user from the authRepository
 final authStateChangeProvider = StreamProvider((ref) {
   final authController = ref.watch(authControllerProvider.notifier);
   return authController.authStateChange;
 });
 
+
+//Provider to get the data of the already logged in user from the authRepository
 final getUserDataProvider = StreamProvider.family.autoDispose((ref,String uid) {
     final authController = ref.watch(authControllerProvider.notifier);
  return authController.getUserData(uid);
