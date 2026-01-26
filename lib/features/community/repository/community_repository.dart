@@ -51,6 +51,109 @@ class CommunityRepository {
         );
   }
 
+  FutureVoid editCommunity(Community community) async {
+    try {
+      // print('Community Data is ${community}');
+      return right(_communities.doc(community.name).update(community.toMap()));
+    } on FirebaseException catch (e) {
+      throw e.message!;
+    } catch (e) {
+      return left(Failure((e.toString())));
+    }
+  }
+
+  // Stream<List<Community>> searchCommunity(String query) {
+  //   print('Search query is $query');
+  //   return _communities
+  //       .where(
+  //         'name',
+  //         isEqualTo: query,
+  //         // isGreaterThanOrEqualTo: query.isEmpty ? null : query,
+  //         // isLessThan: query.isEmpty
+  //         //     ? null
+  //         //     : query.substring(0, query.length - 1) +
+  //         //           String.fromCharCode(query.codeUnitAt(query.length - 1) + 1),
+  //       )
+  //       .snapshots()
+  //       .map((event) {
+  //         List<Community> communities = [];
+  //         for (var community in event.docs) {
+  //           communities.add(
+  //             Community.fromMap(community.data() as Map<String, dynamic>),
+  //           );
+  //         }
+  //         print('Fetched Communites are ${communities.length}');
+  //         return communities;
+  //       });
+  // }
+
+  // Stream<List<Community>> searchCommunity(String query) {
+  //   print('Search query is "$query"');
+
+  //   if (query.isEmpty) {
+  //     return _communities.snapshots().map((event) {
+  //       print('Fetched Communities are ${event.docs.length}');
+  //       return event.docs
+  //           .map((doc) => Community.fromMap(doc.data() as Map<String, dynamic>))
+  //           .toList();
+  //     });
+  //   }
+
+  //   return _communities
+  //       .where('name', isGreaterThanOrEqualTo: query)
+  //       .where('name', isLessThanOrEqualTo: '$query\uf8ff')
+  //       .snapshots()
+  //       .map((event) {
+  //         print('Fetched Communities are ${event.docs.length}');
+  //         return event.docs
+  //             .map(
+  //               (doc) => Community.fromMap(doc.data() as Map<String, dynamic>),
+  //             )
+  //             .toList();
+  //       });
+  // }
+
+  Stream<List<Community>> searchCommunity(String query) {
+  print('Search query is "$query"');
+final q = query.toLowerCase();
+  try {
+    if (query.isEmpty) {
+      return _communities.snapshots().map((event) {
+        print('Fetched Communities are ${event.docs.length}');
+        return event.docs
+            .map(
+              (doc) => Community.fromMap(
+                doc.data() as Map<String, dynamic>,
+              ),
+            )
+            .toList();
+      });
+    }
+
+    return _communities
+        .where('name', isGreaterThanOrEqualTo: q)
+        .where('name', isLessThanOrEqualTo: '$q\uf8ff')
+        .snapshots()
+        .map((event) {
+          print('Fetched Communities are ${event.docs.length}');
+          return event.docs
+              .map(
+                (doc) => Community.fromMap(
+                  doc.data() as Map<String, dynamic>,
+                ),
+              )
+              .toList();
+        });
+  } catch (e, st) {
+    print('🔥 Error in searchCommunity: $e');
+    print(st);
+
+    // Return a safe empty stream so UI doesn’t crash
+    return Stream.value([]);
+  }
+}
+
+
   CollectionReference get _communities =>
       _firestore.collection(FirebaseConstants.communitiesCollection);
 }
