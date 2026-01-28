@@ -21,11 +21,13 @@ final authStateChangeProvider = StreamProvider((ref) {
   return authController.authStateChange;
 });
 
-
 //Provider to get the data of the already logged in user from the authRepository
-final getUserDataProvider = StreamProvider.family.autoDispose((ref,String uid) {
-    final authController = ref.watch(authControllerProvider.notifier);
- return authController.getUserData(uid);
+final getUserDataProvider = StreamProvider.family.autoDispose((
+  ref,
+  String uid,
+) {
+  final authController = ref.watch(authControllerProvider.notifier);
+  return authController.getUserData(uid);
 });
 
 class AuthController extends StateNotifier<bool> {
@@ -51,5 +53,9 @@ class AuthController extends StateNotifier<bool> {
 
   Stream<UserModel> getUserData(String uid) {
     return _authRepository.getUserData(uid);
+  }
+
+  void logout() async {
+    _authRepository.logout();
   }
 }

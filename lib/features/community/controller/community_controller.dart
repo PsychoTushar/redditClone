@@ -36,7 +36,7 @@ final getCommunityByNameProvider = StreamProvider.family.autoDispose((
       .getCoomunityByName(name);
 });
 
-final searchCommunityProvider = StreamProvider.family.autoDispose((
+final searchCommunityProvider = FutureProvider.family.autoDispose((
   ref,
   String query,
 ) {
@@ -129,7 +129,7 @@ class CommunityController extends StateNotifier<bool> {
     );
   }
 
-  Stream<List<Community>> searchCommunity(String query) {
+  Future<List<Community>> searchCommunity(String query) {
     return _communityRepository.searchCommunity(query);
   }
 }

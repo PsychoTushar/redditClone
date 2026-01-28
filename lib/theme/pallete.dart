@@ -18,26 +18,33 @@ class Pallete {
       iconTheme: IconThemeData(color: whiteColor),
     ),
     // 🎨 Global colors
-  primaryColor: blueColor,
+    primaryColor: blueColor,
 
-  // 🎯 Text color (default everywhere)
-  textTheme: ThemeData.dark().textTheme.apply(
-        bodyColor: whiteColor,
-        displayColor: whiteColor,
-      ),
-
-  // 🎯 Button theme (modern)
-  elevatedButtonTheme: ElevatedButtonThemeData(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: blueColor, // default button color
-      foregroundColor: whiteColor, // text/icon color
+    colorScheme: const ColorScheme.dark(
+      primary: Colors.blue,
+      secondary: Colors.blueAccent,
+      background: blackColor,
+      surface: greyColor,
+      onPrimary: whiteColor,
+      onBackground: whiteColor,
+      onSurface: whiteColor,
     ),
-  ),
+
+    // 🎯 Text color (default everywhere)
+    textTheme: ThemeData.dark().textTheme.apply(
+      bodyColor: whiteColor,
+      displayColor: whiteColor,
+    ),
+
+    // 🎯 Button theme (modern)
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: blueColor, // default button color
+        foregroundColor: whiteColor, // text/icon color
+      ),
+    ),
     drawerTheme: const DrawerThemeData(backgroundColor: drawerColor),
-    // primaryColor: redColor,
-    colorScheme: ThemeData.dark().colorScheme.copyWith(
-      background: drawerColor,
-    ), // will be used as alternative background color
+   
   );
 
   static var lightModeAppTheme = ThemeData.light().copyWith(
@@ -48,8 +55,17 @@ class Pallete {
       elevation: 0,
       iconTheme: IconThemeData(color: blackColor),
     ),
+    colorScheme: const ColorScheme.light(
+      primary: Colors.red,
+      secondary: Colors.redAccent,
+      background: whiteColor,
+      surface: whiteColor,
+      onPrimary: whiteColor,
+      onBackground: blackColor,
+      onSurface: blackColor,
+    ),
     drawerTheme: const DrawerThemeData(backgroundColor: whiteColor),
     primaryColor: redColor,
-    colorScheme: ThemeData.light().colorScheme.copyWith(background: whiteColor),
+    // colorScheme: ThemeData.light().colorScheme.copyWith(background: whiteColor),
   );
 }

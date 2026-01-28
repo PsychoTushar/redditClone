@@ -43,8 +43,14 @@ class CommunityRepository {
   }
 
   Stream<Community> getCoomunityByName(String name) {
+    print('🔥 FETCHING DOC WITH ID: "$name"');
+    // final normalizedName = name.trim();
+      final decodedName = Uri.decodeComponent(name);
+
+    print('Decoded Name is $decodedName');
+
     return _communities
-        .doc(name)
+        .doc(decodedName)
         .snapshots()
         .map(
           (event) => Community.fromMap(event.data() as Map<String, dynamic>),
@@ -63,16 +69,14 @@ class CommunityRepository {
   }
 
   // Stream<List<Community>> searchCommunity(String query) {
-  //   print('Search query is $query');
   //   return _communities
   //       .where(
   //         'name',
-  //         isEqualTo: query,
-  //         // isGreaterThanOrEqualTo: query.isEmpty ? null : query,
-  //         // isLessThan: query.isEmpty
-  //         //     ? null
-  //         //     : query.substring(0, query.length - 1) +
-  //         //           String.fromCharCode(query.codeUnitAt(query.length - 1) + 1),
+  //         isGreaterThanOrEqualTo: query.isEmpty ? 0 : query,
+  //         isLessThan: query.isEmpty
+  //             ? null
+  //             : query.substring(0, query.length - 1) +
+  //                   String.fromCharCode(query.codeUnitAt(query.length - 1) + 1),
   //       )
   //       .snapshots()
   //       .map((event) {
@@ -81,78 +85,47 @@ class CommunityRepository {
   //           communities.add(
   //             Community.fromMap(community.data() as Map<String, dynamic>),
   //           );
+  //           print('hii');
   //         }
-  //         print('Fetched Communites are ${communities.length}');
   //         return communities;
   //       });
   // }
+  Future<List<Community>> searchCommunity(String query) async {
+    print('🔍 searchCommunity called with query: "$query"');
 
-  // Stream<List<Community>> searchCommunity(String query) {
-  //   print('Search query is "$query"');
-
-  //   if (query.isEmpty) {
-  //     return _communities.snapshots().map((event) {
-  //       print('Fetched Communities are ${event.docs.length}');
-  //       return event.docs
-  //           .map((doc) => Community.fromMap(doc.data() as Map<String, dynamic>))
-  //           .toList();
-  //     });
-  //   }
-
-  //   return _communities
-  //       .where('name', isGreaterThanOrEqualTo: query)
-  //       .where('name', isLessThanOrEqualTo: '$query\uf8ff')
-  //       .snapshots()
-  //       .map((event) {
-  //         print('Fetched Communities are ${event.docs.length}');
-  //         return event.docs
-  //             .map(
-  //               (doc) => Community.fromMap(doc.data() as Map<String, dynamic>),
-  //             )
-  //             .toList();
-  //       });
-  // }
-
-  Stream<List<Community>> searchCommunity(String query) {
-  print('Search query is "$query"');
-final q = query.toLowerCase();
-  try {
-    if (query.isEmpty) {
-      return _communities.snapshots().map((event) {
-        print('Fetched Communities are ${event.docs.length}');
-        return event.docs
-            .map(
-              (doc) => Community.fromMap(
-                doc.data() as Map<String, dynamic>,
-              ),
-            )
-            .toList();
-      });
+    if (query.trim().isEmpty) {
+      print('⚠️ Query is empty, returning empty list');
+      return [];
     }
 
-    return _communities
-        .where('name', isGreaterThanOrEqualTo: q)
-        .where('name', isLessThanOrEqualTo: '$q\uf8ff')
-        .snapshots()
-        .map((event) {
-          print('Fetched Communities are ${event.docs.length}');
-          return event.docs
-              .map(
-                (doc) => Community.fromMap(
-                  doc.data() as Map<String, dynamic>,
-                ),
-              )
-              .toList();
-        });
-  } catch (e, st) {
-    print('🔥 Error in searchCommunity: $e');
-    print(st);
+    String searchQuery = query.trim();
+    print('🔎 Searching Firestore for: "$searchQuery"');
 
-    // Return a safe empty stream so UI doesn’t crash
-    return Stream.value([]);
+    try {
+      // Get snapshot once (not a stream)
+      final snapshot = await _communities.get();
+
+      print('✅ Firestore returned ${snapshot.docs.length} total documents');
+
+      List<Community> allCommunities = snapshot.docs
+          .map((doc) => Community.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
+
+      // Filter client-side (case-sensitive)
+      List<Community> filtered = allCommunities
+          .where((community) => community.name.startsWith(searchQuery))
+          .toList();
+
+      print(
+        '📊 After filtering: ${filtered.length} communities match "$searchQuery"',
+      );
+
+      return filtered;
+    } catch (error) {
+      print('❌ Firestore error: $error');
+      rethrow;
+    }
   }
-}
-
 
   CollectionReference get _communities =>
       _firestore.collection(FirebaseConstants.communitiesCollection);
