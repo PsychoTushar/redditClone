@@ -30,6 +30,34 @@ class CommunityRepository {
     }
   }
 
+  FutureVoid joinCommunity(String communityName, String userId) async {
+    try {
+      return right(
+        _communities.doc(communityName).update({
+          'members': FieldValue.arrayUnion([userId]),
+        }),
+      );
+    } on FirebaseException catch (e) {
+      throw e.message!;
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
+  FutureVoid leaveCommunity(String communityName, String userId) async {
+    try {
+      return right(
+        _communities.doc(communityName).update({
+          'members': FieldValue.arrayRemove([userId]),
+        }),
+      );
+    } on FirebaseException catch (e) {
+      throw e.message!;
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
   Stream<List<Community>> getUserCommunity(String uid) {
     return _communities.where('members', arrayContains: uid).snapshots().map((
       event,
@@ -45,7 +73,7 @@ class CommunityRepository {
   Stream<Community> getCoomunityByName(String name) {
     print('🔥 FETCHING DOC WITH ID: "$name"');
     // final normalizedName = name.trim();
-      final decodedName = Uri.decodeComponent(name);
+    final decodedName = Uri.decodeComponent(name);
 
     print('Decoded Name is $decodedName');
 
@@ -124,6 +152,19 @@ class CommunityRepository {
     } catch (error) {
       print('❌ Firestore error: $error');
       rethrow;
+    }
+  }
+
+  FutureVoid addMods(String communityName, List<String> uids) async {
+    try {
+      final decodedName = Uri.decodeComponent(communityName);
+
+      // print('Community Data is ${community}');
+      return right(_communities.doc(decodedName).update({'mods': uids}));
+    } on FirebaseException catch (e) {
+      throw e.message!;
+    } catch (e) {
+      return left(Failure((e.toString())));
     }
   }
 
