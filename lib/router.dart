@@ -10,6 +10,9 @@ import 'package:reddit/features/community/screens/create_community_screen.dart';
 import 'package:reddit/features/community/screens/edit_community_screen.dart';
 import 'package:reddit/features/community/screens/mod_tools_screen.dart';
 import 'package:reddit/features/home/screen/home_screen.dart';
+import 'package:reddit/features/post/screens/add_post_screen.dart';
+import 'package:reddit/features/post/screens/add_post_type_screen.dart';
+import 'package:reddit/features/post/screens/comments_screen.dart';
 import 'package:reddit/features/user_profile/screens/edit_profile_screen.dart';
 import 'package:reddit/features/user_profile/screens/user_profile_screen.dart';
 import 'package:routemaster/routemaster.dart';
@@ -41,5 +44,12 @@ final loggedInRoute = RouteMap(
     '/edit-profile/:uid': (routeData) => MaterialPage(
       child: EditProfileScreen(uid: routeData.pathParameters['uid']!),
     ),
+    '/add-post/:type': (routeData) => MaterialPage(
+      child: AddPostTypeScreen(type: routeData.pathParameters['type']!),
+    ),
+    '/post/:postId/comments': (routeData) => MaterialPage(
+      child: CommentsScreen(postId: routeData.pathParameters['postId']!),
+    ),
+    '/add-post/': (routeData) => MaterialPage(child: AddPostScreen()),
   },
 );

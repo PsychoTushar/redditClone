@@ -1,16 +1,18 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:reddit/core/constants/contants.dart';
 import 'package:reddit/core/failure.dart';
-import 'package:reddit/core/providers/store_repository_provider.dart';
+import 'package:reddit/core/providers/storage_repository_provider.dart';
 import 'package:reddit/core/utils.dart';
 import 'package:reddit/features/auth/controller/auth_controller.dart';
 import 'package:reddit/features/community/repository/community_repository.dart';
 import 'package:reddit/models/community_model.dart';
+import 'package:reddit/models/post_model.dart';
 import 'package:routemaster/routemaster.dart';
 
 final userCommunityProvider = StreamProvider.autoDispose((ref) {
@@ -43,6 +45,12 @@ final searchCommunityProvider = FutureProvider.family.autoDispose((
   String query,
 ) {
   return ref.watch(communityControllerProvider.notifier).searchCommunity(query);
+});
+final getCommunityPostsProvider = StreamProvider.family.autoDispose((
+  ref,
+  String name,
+) {
+  return ref.read(communityControllerProvider.notifier).getCommunityPosts(name);
 });
 
 class CommunityController extends StateNotifier<bool> {
@@ -110,16 +118,19 @@ class CommunityController extends StateNotifier<bool> {
     required File? bannerFile,
     required BuildContext context,
     required Community community,
+    required Uint8List? profileWebFile,
+    required Uint8List? bannerWebFile,
   }) async {
     state = true;
     // Community updatedCommunity = community;
 
-    if (profileFile != null) {
+    if (profileFile != null || profileWebFile != null) {
       //stores the file in communnites/profile/{communityName}
       final res = await _storageRepository.storeFile(
         path: 'community/profile',
         id: community.name,
         file: profileFile,
+        webFile: profileWebFile,
       );
       res.fold((l) => showSnackBar(context, l.message), (r) {
         community = community.copyWith(avatar: r);
@@ -127,12 +138,13 @@ class CommunityController extends StateNotifier<bool> {
       });
     }
 
-    if (bannerFile != null) {
+    if (bannerFile != null || bannerWebFile != null) {
       //stores the file in communnites/banner/{communityName}
       final res = await _storageRepository.storeFile(
         path: 'community/banner',
         id: community.name,
         file: bannerFile,
+        webFile: bannerWebFile,
       );
       res.fold((l) => showSnackBar(context, l.message), (r) {
         community = community.copyWith(banner: r);
@@ -163,5 +175,9 @@ class CommunityController extends StateNotifier<bool> {
       (l) => showSnackBar(context, l.message),
       (r) => Routemaster.of(context).pop(),
     );
+  }
+
+  Stream<List<Post>> getCommunityPosts(String name) {
+    return _communityRepository.getCommunityPosts(name);
   }
 }

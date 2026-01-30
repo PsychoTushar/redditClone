@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reddit/core/common/error_test.dart';
 import 'package:reddit/core/common/loader.dart';
+import 'package:reddit/core/common/post_card.dart';
 import 'package:reddit/features/auth/controller/auth_controller.dart';
 import 'package:reddit/features/community/controller/community_controller.dart';
 import 'package:reddit/models/community_model.dart';
@@ -24,6 +25,8 @@ class CommunityScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
+    final isGuest = !user!.isAuthenticated;
+
     return Scaffold(
       body: ref
           .watch(getCommunityByNameProvider(name))
@@ -66,41 +69,49 @@ class CommunityScreen extends ConsumerWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            community.mods.contains(user!.uid)
-                                ? OutlinedButton(
-                                    onPressed: () =>
-                                        navigateToModTools(context),
-                                    style: ElevatedButton.styleFrom(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
+                            if (!isGuest)
+                              community.mods.contains(user!.uid)
+                                  ? OutlinedButton(
+                                      onPressed: () =>
+                                          navigateToModTools(context),
+                                      style: ElevatedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                        ),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 25,
+                                        ),
                                       ),
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 25,
+                                      child: Text(
+                                        'Mod Tools',
+                                        style: TextStyle(color: Colors.blue),
+                                      ),
+                                    )
+                                  : OutlinedButton(
+                                      onPressed: () => joinCommunity(
+                                        ref,
+                                        community,
+                                        context,
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                        ),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 25,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        community.members.contains(user.uid)
+                                            ? 'Joined'
+                                            : 'Join',
+                                        style: TextStyle(color: Colors.blue),
                                       ),
                                     ),
-                                    child: Text(
-                                      'Mod Tools',
-                                      style: TextStyle(color: Colors.blue),
-                                    ),
-                                  )
-                                : OutlinedButton(
-                                    onPressed: () =>
-                                        joinCommunity(ref, community, context),
-                                    style: ElevatedButton.styleFrom(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 25,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      community.members.contains(user.uid)
-                                          ? 'Joined'
-                                          : 'Join',
-                                      style: TextStyle(color: Colors.blue),
-                                    ),
-                                  ),
                           ],
                         ),
                         Padding(
@@ -112,9 +123,25 @@ class CommunityScreen extends ConsumerWidget {
                   ),
                 ];
               },
-              body: Text('Displaying Posts'),
+              body: ref
+                  .watch(getCommunityPostsProvider(name))
+                  .when(
+                    data: (posts) {
+                      return ListView.builder(
+                        itemCount: posts.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final post = posts[index];
+                          return PostCard(post: post);
+                        },
+                      );
+                    },
+                    error: (error, stackTrace) {
+                      return ErrorText(error: error.toString());
+                    },
+                    loading: () => Loader(),
+                  ),
             ),
-            error: (error, StackTrace) => ErrorText(error: error.toString()),
+            error: (error, stackTrace) => ErrorText(error: error.toString()),
             loading: () => Loader(),
           ),
     );

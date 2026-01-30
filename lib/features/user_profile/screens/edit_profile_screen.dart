@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:dotted_border/dotted_border.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reddit/core/common/error_test.dart';
@@ -10,6 +12,7 @@ import 'package:reddit/core/utils.dart';
 import 'package:reddit/features/auth/controller/auth_controller.dart';
 import 'package:reddit/features/user_profile/controller/user_profile_controller.dart';
 import 'package:reddit/models/community_model.dart';
+import 'package:reddit/responsive.dart';
 import 'package:reddit/theme/pallete.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
@@ -25,6 +28,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   File? bannerFile;
   File? profileFile;
   late TextEditingController nameController;
+  Uint8List? bannerWebFile;
+  Uint8List? profileWebFile;
 
   @override
   void initState() {
@@ -41,6 +46,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   void selectBannerImage() async {
     final res = await pickImage();
     if (res != null) {
+      if (kIsWeb) {
+        setState(() {
+          bannerWebFile = res.files.first.bytes;
+        });
+      }
       setState(() {
         bannerFile = File(res.files.first.path!);
       });
@@ -50,6 +60,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   void selectProfileImage() async {
     final res = await pickImage();
     if (res != null) {
+      if (kIsWeb) {
+        setState(() {
+          profileWebFile = res.files.first.bytes;
+        });
+      }
       setState(() {
         profileFile = File(res.files.first.path!);
       });
@@ -64,6 +79,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           bannerFile: bannerFile,
           context: context,
           name: nameController.text.trim(),
+          bannerWebFile: bannerWebFile,
+          profileWebFile: profileWebFile,
         );
   }
 
@@ -84,88 +101,90 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
             body: isLoading
                 ? Loader()
-                : Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 200,
-                          child: Stack(
-                            children: [
-                              GestureDetector(
-                                onTap: () => selectBannerImage(),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: DottedBorder(
-                                    options: RectDottedBorderOptions(
-                                      color: Colors.grey,
-                                      strokeWidth: 1,
-                                      strokeCap: StrokeCap.round,
-                                      dashPattern: const [
-                                        10,
-                                        4,
-                                      ], // dot length, space
-                                    ),
-
-                                    child: Container(
-                                      width: double.infinity,
-                                      height: 180,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
+                : Responsive(
+                  child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 200,
+                            child: Stack(
+                              children: [
+                                GestureDetector(
+                                  onTap: () => selectBannerImage(),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: DottedBorder(
+                                      options: RectDottedBorderOptions(
+                                        color: Colors.grey,
+                                        strokeWidth: 1,
+                                        strokeCap: StrokeCap.round,
+                                        dashPattern: const [
+                                          10,
+                                          4,
+                                        ], // dot length, space
                                       ),
-                                      child: bannerFile != null
-                                          ? Image.file(bannerFile!)
-                                          : user.banner.isEmpty ||
-                                                user.banner ==
-                                                    Constants.bannerDefault
-                                          ? Center(
-                                              child: Icon(
-                                                Icons.camera_alt_outlined,
-                                                size: 40,
-                                              ),
-                                            )
-                                          : Image.network(user.banner),
+                  
+                                      child: Container(
+                                        width: double.infinity,
+                                        height: 180,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child:bannerWebFile!=null? Image.memory(bannerWebFile!): bannerFile != null
+                                            ? Image.file(bannerFile!)
+                                            : user.banner.isEmpty ||
+                                                  user.banner ==
+                                                      Constants.bannerDefault
+                                            ? Center(
+                                                child: Icon(
+                                                  Icons.camera_alt_outlined,
+                                                  size: 40,
+                                                ),
+                                              )
+                                            : Image.network(user.banner),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              Positioned(
-                                left: 20,
-                                bottom: 0,
-                                child: GestureDetector(
-                                  onTap: () => selectProfileImage(),
-                                  child: CircleAvatar(
-                                    backgroundImage: profileFile != null
-                                        ? FileImage(profileFile!)
-                                        : NetworkImage(user.profilePic),
-                                    radius: 32,
+                                Positioned(
+                                  left: 20,
+                                  bottom: 0,
+                                  child: GestureDetector(
+                                    onTap: () => selectProfileImage(),
+                                    child: CircleAvatar(
+                                      backgroundImage:profileWebFile!=null?MemoryImage(profileWebFile!): profileFile != null
+                                          ? FileImage(profileFile!)
+                                          : NetworkImage(user.profilePic),
+                                      radius: 32,
+                                    ),
                                   ),
                                 ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          TextField(
+                            controller: nameController,
+                            decoration: InputDecoration(
+                              filled: true,
+                              hintText: 'Name',
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                // borderSide: BorderSide(color: Colors.blue),
                               ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        TextField(
-                          controller: nameController,
-                          decoration: InputDecoration(
-                            filled: true,
-                            hintText: 'Name',
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              // borderSide: BorderSide(color: Colors.blue),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: Colors.blue),
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.all(18),
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.blue),
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.all(18),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
+                ),
           ),
           error: (error, stackTrace) => ErrorText(error: error.toString()),
           loading: () => Loader(),

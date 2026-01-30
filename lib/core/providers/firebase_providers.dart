@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -13,9 +14,16 @@ final googleSignInProvider = Provider<GoogleSignIn>((ref) {
 
   // MUST be called exactly once
   googleSignIn.initialize(
-    serverClientId:
-        '355480003866-09637q7r3tbtgq3b4chfulu448fi4snd.apps.googleusercontent.com',
+    // serverClientId:
+    //     '355480003866-09637q7r3tbtgq3b4chfulu448fi4snd.apps.googleusercontent.com',
+        clientId:   kIsWeb
+        ? '355480003866-09637q7r3tbtgq3b4chfulu448fi4snd.apps.googleusercontent.com'
+        : null,
   );
 
   return googleSignIn;
 });
+
+
+
+
